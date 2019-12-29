@@ -7,6 +7,7 @@ import com.awk.featr.ast.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -54,7 +55,7 @@ public class DocumentReader {
         }
 
         if (feature == null) throw new ParserException("No Feature found in this file.");
-        return new Document(feature, language, comment.toString());
+        return new Document(UUID.randomUUID().toString(), feature, language, comment.toString());
     }
 
 }

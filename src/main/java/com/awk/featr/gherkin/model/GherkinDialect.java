@@ -1,51 +1,88 @@
 package com.awk.featr.gherkin.model;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import static java.util.Objects.requireNonNull;
 
 public class GherkinDialect {
-    private final JsonObject keywords;
-    private String language;
+    public static final String AND = "and";
+    public static final String BACKGROUND = "background";
+    public static final String BUT = "but";
+    public static final String EXAMPLES = "examples";
+    public static final String FEATURE = "feature";
+    public static final String GIVEN = "given";
+    public static final String RULE = "rule";
+    public static final String SCENARIO = "scenario";
+    public static final String SCENARIOOUTLINE = "scenarioOutline";
+    public static final String THEN = "then";
+    public static final String WHEN = "when";
 
-    public GherkinDialect(String language, JsonObject keywords) {
-        this.language = language;
-        this.keywords = keywords;
+    private final String language;
+    private final String name;
+    private final String nativeName;
+    private final KeywordsMap keywordMap;
+
+    public GherkinDialect(String language, String name, String nativeName, KeywordsMap keywordMap) {
+        this.language = requireNonNull(language);
+        this.name = requireNonNull(name);
+        this.nativeName = requireNonNull(nativeName);
+        this.keywordMap = requireNonNull(keywordMap);
     }
 
-    public List<String> getFeatureKeywords() {
-        return toStringList(this.keywords.getAsJsonArray("feature"));
-    }
-
-    private static List<String> toStringList(JsonArray array) {
-        List<String> result = new ArrayList<>();
-        for (JsonElement jsonValue : array) {
-            result.add(jsonValue.getAsString());
-        }
-        return result;
+    public String getLanguage() {
+        return language;
     }
 
     public String getName() {
-        return keywords.get("name").getAsString();
+        return name;
     }
 
     public String getNativeName() {
-        return keywords.get("native").getAsString();
+        return nativeName;
+    }
+
+    public List<String> getFeatureKeywords() {
+        return keywordMap.get(FEATURE);
     }
 
     public List<String> getRuleKeywords() {
-        return toStringList(keywords.getAsJsonArray("rule"));
+        return keywordMap.get(RULE);
     }
 
     public List<String> getScenarioKeywords() {
-        return toStringList(keywords.getAsJsonArray("scenario"));
+        return keywordMap.get(SCENARIO);
     }
 
     public List<String> getScenarioOutlineKeywords() {
-        return toStringList(keywords.getAsJsonArray("scenarioOutline"));
+        return keywordMap.get(SCENARIOOUTLINE);
+    }
+
+    public List<String> getBackgroundKeywords() {
+        return keywordMap.get(BACKGROUND);
+    }
+
+    public List<String> getExamplesKeywords() {
+        return keywordMap.get(EXAMPLES);
+    }
+
+    public List<String> getGivenKeywords() {
+        return keywordMap.get(GIVEN);
+    }
+
+    public List<String> getWhenKeywords() {
+        return keywordMap.get(WHEN);
+    }
+
+    public List<String> getThenKeywords() {
+        return keywordMap.get(THEN);
+    }
+
+    public List<String> getAndKeywords() {
+        return keywordMap.get(AND);
+    }
+
+    public List<String> getButKeywords() {
+        return keywordMap.get(BUT);
     }
 
     public List<String> getStepKeywords() {
@@ -56,37 +93,5 @@ public class GherkinDialect {
         result.addAll(getAndKeywords());
         result.addAll(getButKeywords());
         return result;
-    }
-
-    public List<String> getBackgroundKeywords() {
-        return toStringList(keywords.getAsJsonArray("background"));
-    }
-
-    public List<String> getExamplesKeywords() {
-        return toStringList(keywords.getAsJsonArray("examples"));
-    }
-
-    public List<String> getGivenKeywords() {
-        return toStringList(keywords.getAsJsonArray("given"));
-    }
-
-    public List<String> getWhenKeywords() {
-        return toStringList(keywords.getAsJsonArray("when"));
-    }
-
-    public List<String> getThenKeywords() {
-        return toStringList(keywords.getAsJsonArray("then"));
-    }
-
-    public List<String> getAndKeywords() {
-        return toStringList(keywords.getAsJsonArray("and"));
-    }
-
-    public List<String> getButKeywords() {
-        return toStringList(keywords.getAsJsonArray("but"));
-    }
-
-    public String getLanguage() {
-        return language;
     }
 }

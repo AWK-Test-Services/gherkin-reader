@@ -6,7 +6,7 @@
 
     <groupId>com.awk-test-services</groupId>
     <artifactId>gherkin-reader</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -32,8 +32,8 @@
     <dependencies>
         <dependency>
             <groupId>com.awk-test-services</groupId>
-            <artifactId>featr-AST-model</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>featr-ast-model</artifactId>
+            <version>0.1.2</version>
         </dependency>
     </dependencies>
 
@@ -42,11 +42,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
-                        <phase>verify</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>

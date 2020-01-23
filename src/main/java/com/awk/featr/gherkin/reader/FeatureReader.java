@@ -1,5 +1,6 @@
 package com.awk.featr.gherkin.reader;
 
+import com.awk.featr.gherkin.helper.CompositeParserException;
 import com.awk.featr.gherkin.helper.GherkinLanguageConstants;
 import com.awk.featr.gherkin.helper.ParserException;
 import com.awk.featr.gherkin.model.GherkinLine;
@@ -20,61 +21,68 @@ public class FeatureReader {
                 .withTags(tags);
     }
 
-    public Feature parse(LineReader reader, TokenMatcher tokenMatcher) {
+    public Feature parse(LineReader reader, TokenMatcher tokenMatcher) throws ParserException {
         List<String> tagsToRemember = new ArrayList<>();
         List<ScenarioDefinition> scenarioDefinitionsToRemember = new ArrayList<>();
         StringBuilder descriptionToRemember = new StringBuilder();
         boolean rereadLastLine = false;
+        CompositeParserException errors = new CompositeParserException();
 
         GherkinLine line = reader.read();
         while(line.isNotEOF()) {
-            if (line.isNotEmpty()) {
-                Logger.getLogger(FeatureReader.class.getName()).log(Level.INFO,line.getLineNr() + ": Processing line: " + line.getLineText());
+            try {
+                if (line.isNotEmpty()) {
+                    Logger.getLogger(FeatureReader.class.getName()).log(Level.INFO,line.getLineNr() + ": Processing line: " + line.getLineText());
 
-                if (line.startsWith(GherkinLanguageConstants.COMMENT_PREFIX)) {
-                    //ignore
-                } else if (tokenMatcher.match_TagLine(line)) {
-                    List<String> tagsToAdd = tokenMatcher.getTags(line)
-                            .stream()
-                            .map(lineSpan -> lineSpan.text)
-                            .collect(Collectors.toList());
-                    tagsToRemember.addAll(tagsToAdd);
+                    if (line.startsWith(GherkinLanguageConstants.COMMENT_PREFIX)) {
+                        //ignore
+                    } else if (tokenMatcher.match_TagLine(line)) {
+                        List<String> tagsToAdd = tokenMatcher.getTags(line)
+                                .stream()
+                                .map(lineSpan -> lineSpan.text)
+                                .collect(Collectors.toList());
+                        tagsToRemember.addAll(tagsToAdd);
 
-                } else if (tokenMatcher.match_BackgroundLine(line)) {
-                    if ( !scenarioDefinitionsToRemember.isEmpty() ) {
-                        throw new ParserException.AstBuilderException("Background was not first in the Feature", line.getLineNr());
+                    } else if (tokenMatcher.match_BackgroundLine(line)) {
+                        if ( !scenarioDefinitionsToRemember.isEmpty() ) {
+                            throw new ParserException("Background was not first in the Feature", line);
+                        }
+                        String title = tokenMatcher.getBackgroundTitle(line);
+                        Background background = new BackgroundReader(title).parse(reader, tokenMatcher);
+                        featureBuilder.withBackground(background);
+                        rereadLastLine = true;
+
+                    } else if (tokenMatcher.match_ScenarioLine(line)) {
+                        String title = tokenMatcher.getScenarioLine(line);
+                        Scenario scenario = new ScenarioReader(title, tagsToRemember).parse(reader, tokenMatcher);
+                        scenarioDefinitionsToRemember.add(scenario);
+                        rereadLastLine = true;
+
+                    } else if (tokenMatcher.match_ScenarioOutlineLine(line)) {
+                        String title = tokenMatcher.getScenarioOutlineLine(line);
+                        ScenarioOutline scenarioOutline = new ScenarioOutlineReader(title, tagsToRemember).parse(reader, tokenMatcher);
+                        scenarioDefinitionsToRemember.add(scenarioOutline);
+                        rereadLastLine = true;
+
+                    } else if (tokenMatcher.match_RuleLine(line)) {
+                        String rule = tokenMatcher.getRule(line);
+                        featureBuilder.withRule( rule );
+
+                    } else {
+                        if (descriptionToRemember.length() > 0)
+                            descriptionToRemember.append("\n");
+                        descriptionToRemember.append(tokenMatcher.getOther(line));
                     }
-                    String title = tokenMatcher.getBackgroundTitle(line);
-                    Background background = new BackgroundReader(title).parse(reader, tokenMatcher);
-                    featureBuilder.withBackground(background);
-                    rereadLastLine = true;
-
-                } else if (tokenMatcher.match_ScenarioLine(line)) {
-                    String title = tokenMatcher.getScenarioLine(line);
-                    Scenario scenario = new ScenarioReader(title, tagsToRemember).parse(reader, tokenMatcher);
-                    scenarioDefinitionsToRemember.add(scenario);
-                    rereadLastLine = true;
-
-                } else if (tokenMatcher.match_ScenarioOutlineLine(line)) {
-                    String title = tokenMatcher.getScenarioOutlineLine(line);
-                    ScenarioOutline scenarioOutline = new ScenarioOutlineReader(title, tagsToRemember).parse(reader, tokenMatcher);
-                    scenarioDefinitionsToRemember.add(scenarioOutline);
-                    rereadLastLine = true;
-
-                } else if (tokenMatcher.match_RuleLine(line)) {
-                    String rule = tokenMatcher.getRule(line);
-                    featureBuilder.withRule( rule );
-
-                } else {
-                    if (descriptionToRemember.length() > 0)
-                        descriptionToRemember.append("\n");
-                    descriptionToRemember.append(tokenMatcher.getOther(line));
                 }
+            } catch ( ParserException e ) {
+                errors.addError(e);
             }
 
             line = rereadLastLine ? reader.getLastReadLine() : reader.read();
             rereadLastLine = false;
         }
+
+        if (!errors.isEmpty()) throw errors.getParserException();
 
         featureBuilder.withDescription(descriptionToRemember.toString());
         featureBuilder.withScenarioDefinitions(scenarioDefinitionsToRemember);

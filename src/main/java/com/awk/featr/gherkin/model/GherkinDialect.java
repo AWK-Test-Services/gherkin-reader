@@ -5,24 +5,24 @@ import java.util.*;
 import static java.util.Objects.requireNonNull;
 
 public class GherkinDialect {
-    public static final String AND = "and";
-    public static final String BACKGROUND = "background";
-    public static final String BUT = "but";
-    public static final String EXAMPLES = "examples";
-    public static final String FEATURE = "feature";
-    public static final String GIVEN = "given";
-    public static final String RULE = "rule";
-    public static final String SCENARIO = "scenario";
-    public static final String SCENARIOOUTLINE = "scenarioOutline";
-    public static final String THEN = "then";
-    public static final String WHEN = "when";
+    static final String AND = "and";
+    static final String BACKGROUND = "background";
+    static final String BUT = "but";
+    static final String EXAMPLES = "examples";
+    static final String FEATURE = "feature";
+    static final String GIVEN = "given";
+    static final String RULE = "rule";
+    static final String SCENARIO = "scenario";
+    static final String SCENARIOOUTLINE = "scenarioOutline";
+    static final String THEN = "then";
+    static final String WHEN = "when";
 
     private final String language;
     private final String name;
     private final String nativeName;
     private final KeywordsMap keywordMap;
 
-    public GherkinDialect(String language, String name, String nativeName, KeywordsMap keywordMap) {
+    GherkinDialect(String language, String name, String nativeName, KeywordsMap keywordMap) {
         this.language = requireNonNull(language);
         this.name = requireNonNull(name);
         this.nativeName = requireNonNull(nativeName);

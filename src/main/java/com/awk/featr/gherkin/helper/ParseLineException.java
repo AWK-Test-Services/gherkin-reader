@@ -2,15 +2,15 @@ package com.awk.featr.gherkin.helper;
 
 import com.awk.featr.gherkin.model.GherkinLine;
 
-public class ParserException extends Exception {
+public class ParseLineException extends ParserException {
     private final GherkinLine line;
 
-    public ParserException(String errorText) {
+    public ParseLineException(String errorText) {
         super(errorText);
         line = null;
     }
 
-    public ParserException(String errorText, GherkinLine line) {
+    public ParseLineException(String errorText, GherkinLine line) {
         super(errorText);
         this.line = line;
     }

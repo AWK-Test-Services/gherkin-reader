@@ -1,8 +1,9 @@
 package com.awk.featr.gherkin.reader;
 
-import com.awk.featr.gherkin.helper.ParserException;
+import com.awk.featr.gherkin.helper.NoSuchLanguageException;
 import com.awk.featr.gherkin.model.GherkinDialect;
 import com.awk.featr.gherkin.model.GherkinLanguages;
+import com.awk.featr.gherkin.model.GherkinLine;
 
 public class GherkinDialectProvider {
     private final String defaultDialectName;
@@ -19,11 +20,11 @@ public class GherkinDialectProvider {
         return GherkinLanguages.get("en");
     }
 
-    public GherkinDialect getDialect(String language, int lineNr) {
+    public GherkinDialect getDialect(String language, GherkinLine line) throws NoSuchLanguageException {
         if ( GherkinLanguages.has(language) )
         {
             return GherkinLanguages.get(language);
         }
-        throw new ParserException.NoSuchLanguageException("There is no language defined for \"" + language + "\"", lineNr);
+        throw new NoSuchLanguageException("There is no language defined for \"" + language + "\"", line);
     }
 }

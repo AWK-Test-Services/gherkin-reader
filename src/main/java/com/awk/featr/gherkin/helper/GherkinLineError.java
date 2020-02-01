@@ -1,20 +1,19 @@
 package com.awk.featr.gherkin.helper;
 
+import com.awk.featr.ast.GherkinError;
 import com.awk.featr.gherkin.model.GherkinLine;
 
-public class ParseLineException extends ParserException {
+public class GherkinLineError implements GherkinError {
+    private final String message;
     private final GherkinLine line;
 
-    public ParseLineException(String errorText, GherkinLine line) {
-        super(errorText);
+    public GherkinLineError(String message, GherkinLine line) {
+        this.message = message;
         this.line = line;
     }
 
-    public String toString() {
+    @Override
+    public String getMessage() {
         return String.format("%s: %s\non line \"%s\"", line.getLineNr(), this.getMessage(), line.getLineText());
-    }
-
-    public GherkinLine getLine() {
-        return line;
     }
 }

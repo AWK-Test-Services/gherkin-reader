@@ -2,15 +2,14 @@ package com.awk.featr.gherkin.reader;
 
 import com.awk.featr.gherkin.helper.CompositeParserException;
 import com.awk.featr.gherkin.helper.GherkinLanguageConstants;
+import com.awk.featr.gherkin.helper.ParseLineException;
 import com.awk.featr.gherkin.helper.ParserException;
 import com.awk.featr.gherkin.model.GherkinLine;
 import com.awk.featr.ast.Background;
 import com.awk.featr.ast.Step;
 import com.awk.featr.ast.builder.BackgroundBuilder;
-import com.awk.featr.gherkin.model.ParseEnvelope;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,10 +21,10 @@ public class BackgroundReader {
         backgroundBuilder = new BackgroundBuilder(backgroundTitle);
     }
 
-    public Background parse(LineReader reader, TokenMatcher tokenMatcher) throws ParserException {
+    public Background parse(LineReader reader, TokenMatcher tokenMatcher) throws CompositeParserException {
         List<Step> stepsToRemember = new ArrayList<>();
         boolean rereadLastLine = false;
-        CompositeParserException errors = new CompositeParserException();
+        List<ParseLineException> exceptions = new ArrayList<>();
 
         GherkinLine line = reader.read();
         while(line.isNotEOF()) {
@@ -45,19 +44,21 @@ public class BackgroundReader {
                     } else if (tokenMatcher.match_ScenarioDefinitionLine(line)) {
                         return build(stepsToRemember);
                     } else {
-                        throw new ParserException("No or unknown tag found", line);
+                        throw new ParseLineException("No or unknown tag found", line);
                     }
                 }
 
-            } catch ( ParserException e ) {
-                errors.addError(e);
+            } catch ( ParseLineException e ) {
+                exceptions.add(e);
+            } catch (CompositeParserException e) {
+                exceptions.addAll(e.getExceptions());
             }
 
             line = rereadLastLine ? reader.getLastReadLine() : reader.read();
             rereadLastLine = false;
         }
 
-        if (!errors.isEmpty()) throw errors.getParserException();
+        if (!exceptions.isEmpty()) throw new CompositeParserException(exceptions);
 
         return build(stepsToRemember);
     }

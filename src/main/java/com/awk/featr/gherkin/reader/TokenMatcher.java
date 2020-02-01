@@ -1,7 +1,7 @@
 package com.awk.featr.gherkin.reader;
 
 import com.awk.featr.gherkin.helper.GherkinLanguageConstants;
-import com.awk.featr.gherkin.helper.ParserException;
+import com.awk.featr.gherkin.helper.ParseLineException;
 import com.awk.featr.gherkin.model.GherkinDialect;
 import com.awk.featr.gherkin.model.GherkinLine;
 import com.awk.featr.gherkin.model.GherkinLineSpan;
@@ -28,18 +28,18 @@ public class TokenMatcher {
         return line.startsWith(GherkinLanguageConstants.TAG_PREFIX);
     }
 
-    List<GherkinLineSpan> getTags(GherkinLine line) throws ParserException {
+    List<GherkinLineSpan> getTags(GherkinLine line) throws ParseLineException {
         if (line.startsWith(GherkinLanguageConstants.TAG_PREFIX)) {
             return line.getTags();
         }
-        throw new ParserException("No tag found", line);
+        throw new ParseLineException("No tag found", line);
     }
 
-    String getCommentLine(GherkinLine line) throws ParserException {
+    String getCommentLine(GherkinLine line) throws ParseLineException {
         if (line.startsWith(GherkinLanguageConstants.COMMENT_PREFIX)) {
             return line.getRestTrimmed(GherkinLanguageConstants.COMMENT_PREFIX.length());
         }
-        throw new ParserException("Not a comment line", line);
+        throw new ParseLineException("Not a comment line", line);
     }
 
     boolean match_FeatureLine(GherkinLine line) {
@@ -51,13 +51,13 @@ public class TokenMatcher {
         return false;
     }
 
-    String getFeatureTitle(GherkinLine line) throws ParserException {
+    String getFeatureTitle(GherkinLine line) throws ParseLineException {
         for (String keyword : currentDialect.getFeatureKeywords()) {
             if (line.startsWithTitleKeyword(keyword)) {
                 return line.getRestTrimmed(keyword.length() + GherkinLanguageConstants.TITLE_KEYWORD_SEPARATOR.length());
             }
         }
-        throw new ParserException("Not a Feature title line", line);
+        throw new ParseLineException("Not a Feature title line", line);
     }
 
     boolean match_RuleLine(GherkinLine line) {
@@ -69,13 +69,13 @@ public class TokenMatcher {
         return false;
     }
 
-    String getRule(GherkinLine line) throws ParserException {
+    String getRule(GherkinLine line) throws ParseLineException {
         for (String keyword : currentDialect.getRuleKeywords()) {
             if (line.startsWithTitleKeyword(keyword)) {
                 return line.getRestTrimmed(keyword.length() + GherkinLanguageConstants.TITLE_KEYWORD_SEPARATOR.length());
             }
         }
-        throw new ParserException("Not a Rule line", line);
+        throw new ParseLineException("Not a Rule line", line);
     }
 
     boolean match_BackgroundLine(GherkinLine line) {
@@ -87,13 +87,13 @@ public class TokenMatcher {
         return false;
     }
 
-    String getBackgroundTitle(GherkinLine line) throws ParserException {
+    String getBackgroundTitle(GherkinLine line) throws ParseLineException {
         for (String keyword : currentDialect.getBackgroundKeywords()) {
             if (line.startsWithTitleKeyword(keyword)) {
                 return line.getRestTrimmed(keyword.length() + GherkinLanguageConstants.TITLE_KEYWORD_SEPARATOR.length());
             }
         }
-        throw new ParserException("Not a Background line", line);
+        throw new ParseLineException("Not a Background line", line);
     }
 
     boolean match_ScenarioLine(GherkinLine line) {
@@ -105,13 +105,13 @@ public class TokenMatcher {
         return false;
     }
 
-    String getScenarioLine(GherkinLine line) throws ParserException {
+    String getScenarioLine(GherkinLine line) throws ParseLineException {
         for (String keyword : currentDialect.getScenarioKeywords()) {
             if (line.startsWithTitleKeyword(keyword)) {
                 return line.getRestTrimmed(keyword.length() + GherkinLanguageConstants.TITLE_KEYWORD_SEPARATOR.length());
             }
         }
-        throw new ParserException("Not a Scenario line", line);
+        throw new ParseLineException("Not a Scenario line", line);
     }
 
 
@@ -124,13 +124,13 @@ public class TokenMatcher {
         return false;
     }
 
-    String getScenarioOutlineLine(GherkinLine line) throws ParserException {
+    String getScenarioOutlineLine(GherkinLine line) throws ParseLineException {
         for (String keyword : currentDialect.getScenarioOutlineKeywords()) {
             if (line.startsWithTitleKeyword(keyword)) {
                 return line.getRestTrimmed(keyword.length() + GherkinLanguageConstants.TITLE_KEYWORD_SEPARATOR.length());
             }
         }
-        throw new ParserException("Not a ScenarioOutline line", line);
+        throw new ParseLineException("Not a ScenarioOutline line", line);
     }
 
     boolean match_ScenarioDefinitionLine(GherkinLine line) {
@@ -146,20 +146,20 @@ public class TokenMatcher {
         return false;
     }
 
-    String getExampleKeyword(GherkinLine line) throws ParserException {
+    String getExampleKeyword(GherkinLine line) throws ParseLineException {
         for (String keyword : currentDialect.getExamplesKeywords()) {
             if (line.startsWithTitleKeyword(keyword)) {
                 return keyword;
             }
         }
-        throw new ParserException("Not an Examples line", line);
+        throw new ParseLineException("Not an Examples line", line);
     }
 
-    String getExamplesLine(GherkinLine line, String keyword) throws ParserException {
+    String getExamplesLine(GherkinLine line, String keyword) throws ParseLineException {
         if (line.startsWithTitleKeyword(keyword)) {
             return line.getRestTrimmed(keyword.length() + GherkinLanguageConstants.TITLE_KEYWORD_SEPARATOR.length());
         }
-        throw new ParserException("Not a Examples line", line);
+        throw new ParseLineException("Not a Examples line", line);
     }
 
     boolean match_StepLine(GherkinLine line) {
@@ -172,21 +172,21 @@ public class TokenMatcher {
         return false;
     }
 
-    String getStepKeyword(GherkinLine line) throws ParserException {
+    String getStepKeyword(GherkinLine line) throws ParseLineException {
         List<String> keywords = currentDialect.getStepKeywords();
         for (String keyword : keywords) {
             if (line.startsWith(keyword)) {
                 return keyword;
             }
         }
-        throw new ParserException("Not a Step line", line);
+        throw new ParseLineException("Not a Step line", line);
     }
 
-    String getStepText(GherkinLine line, String keyword) throws ParserException {
+    String getStepText(GherkinLine line, String keyword) throws ParseLineException {
         if (line.startsWith(keyword)) {
             return line.getRestTrimmed(keyword.length());
         }
-        throw new ParserException("Line does not start with '" + keyword + "'", line);
+        throw new ParseLineException("Line does not start with '" + keyword + "'", line);
     }
 
     boolean match_DocStringSeparator(GherkinLine line) {
@@ -213,12 +213,12 @@ public class TokenMatcher {
         return false;
     }
 
-    String getDocStringType(GherkinLine line) throws ParserException {
+    String getDocStringType(GherkinLine line) throws ParseLineException {
         if (activeDocStringSeparator != null && line.startsWith(activeDocStringSeparator)) {
             return line.getRestTrimmed(activeDocStringSeparator.length());
         }
 
-        throw new ParserException("Not a DocString opening line", line);
+        throw new ParseLineException("Not a DocString opening line", line);
     }
 
     boolean isDocStringActive() {
@@ -238,12 +238,12 @@ public class TokenMatcher {
         return matcher.matches();
     }
 
-    String getLanguage(GherkinLine line) throws ParserException {
+    String getLanguage(GherkinLine line) throws ParseLineException {
         Matcher matcher = LANGUAGE_PATTERN.matcher(line.getLineText());
         if (matcher.matches()) {
             return matcher.group(1);
         }
-        throw new ParserException("Not a language line", line);
+        throw new ParseLineException("Not a language line", line);
     }
 
     void setDialect(GherkinDialect dialect) {

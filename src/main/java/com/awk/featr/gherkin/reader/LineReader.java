@@ -7,24 +7,28 @@ import static java.util.Objects.requireNonNull;
 public class LineReader {
 
     private final String[] srcLines;
-    private int lineNumber;
+    private int lineNumber = -1;
     private String lastReadLine;
+
+    private int sameLineNumberReadCount;
 
     public LineReader(String source) {
         this.srcLines = requireNonNull(source).split("\\R");
     }
 
-    public GherkinLine read() {
-        ++lineNumber;
+    GherkinLine read() {
+        lineNumber++;
         if ( srcLines.length > lineNumber ) {
             lastReadLine = srcLines[lineNumber];
-            return new GherkinLine(lineNumber, lastReadLine);
+        } else {
+            lastReadLine = null;
         }
-        lastReadLine = null;
-        return new GherkinLine(lineNumber, null);
+        sameLineNumberReadCount = 0;
+        return new GherkinLine(lineNumber+1, lastReadLine);
     }
 
     GherkinLine getLastReadLine() {
-        return new GherkinLine(lineNumber, lastReadLine);
+        if (++sameLineNumberReadCount > 4) return read();
+        return new GherkinLine(lineNumber+1, lastReadLine);
     }
 }

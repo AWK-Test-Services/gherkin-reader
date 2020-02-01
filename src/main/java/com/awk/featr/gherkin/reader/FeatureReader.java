@@ -1,8 +1,6 @@
 package com.awk.featr.gherkin.reader;
 
-import com.awk.featr.gherkin.helper.CompositeParserException;
-import com.awk.featr.gherkin.helper.GherkinLanguageConstants;
-import com.awk.featr.gherkin.helper.ParserException;
+import com.awk.featr.gherkin.helper.*;
 import com.awk.featr.gherkin.model.GherkinLine;
 import com.awk.featr.ast.*;
 import com.awk.featr.ast.builder.FeatureBuilder;
@@ -21,12 +19,12 @@ public class FeatureReader {
                 .withTags(tags);
     }
 
-    public Feature parse(LineReader reader, TokenMatcher tokenMatcher) throws ParserException {
+    public Feature parse(LineReader reader, TokenMatcher tokenMatcher) throws CompositeParserException {
         List<String> tagsToRemember = new ArrayList<>();
         List<ScenarioDefinition> scenarioDefinitionsToRemember = new ArrayList<>();
         StringBuilder descriptionToRemember = new StringBuilder();
         boolean rereadLastLine = false;
-        CompositeParserException errors = new CompositeParserException();
+        List<ParseLineException> exceptions = new ArrayList<>();
 
         GherkinLine line = reader.read();
         while(line.isNotEOF()) {
@@ -45,7 +43,7 @@ public class FeatureReader {
 
                     } else if (tokenMatcher.match_BackgroundLine(line)) {
                         if ( !scenarioDefinitionsToRemember.isEmpty() ) {
-                            throw new ParserException("Background was not first in the Feature", line);
+                            throw new ParseLineException("Background was not first in the Feature", line);
                         }
                         String title = tokenMatcher.getBackgroundTitle(line);
                         Background background = new BackgroundReader(title).parse(reader, tokenMatcher);
@@ -74,15 +72,17 @@ public class FeatureReader {
                         descriptionToRemember.append(tokenMatcher.getOther(line));
                     }
                 }
-            } catch ( ParserException e ) {
-                errors.addError(e);
+            } catch ( ParseLineException e ) {
+                exceptions.add(e);
+            } catch (CompositeParserException e) {
+                exceptions.addAll(e.getExceptions());
             }
 
             line = rereadLastLine ? reader.getLastReadLine() : reader.read();
             rereadLastLine = false;
         }
 
-        if (!errors.isEmpty()) throw errors.getParserException();
+        if (!exceptions.isEmpty()) throw new CompositeParserException(exceptions);
 
         featureBuilder.withDescription(descriptionToRemember.toString());
         featureBuilder.withScenarioDefinitions(scenarioDefinitionsToRemember);

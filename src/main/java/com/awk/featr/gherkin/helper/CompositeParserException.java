@@ -1,55 +1,34 @@
 package com.awk.featr.gherkin.helper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CompositeParserException extends ParserException {
-    private final List<ParserException> errors;
+    private final List<ParseLineException> exceptions;
 
     public CompositeParserException() {
         super("One or more errors were found");
-        this.errors = Collections.EMPTY_LIST;
+        this.exceptions = new ArrayList<>();
     }
 
-    public CompositeParserException(List<ParserException> errors) {
+    public CompositeParserException(List<ParseLineException> exceptions) {
         super("One or more errors were found");
-        this.errors = Collections.unmodifiableList(errors);
+        this.exceptions = exceptions;
     }
 
-    public CompositeParserException(ParserException e) {
-        super("One error was found");
-        this.errors = new ArrayList<>(Collections.singleton(e));
+    public List<ParseLineException> getExceptions() {
+        return exceptions;
     }
 
-    public String toString() {
-        if (errors == null) throw new NullPointerException("CompositeParserException contains no errors");
-        return "Parser errors:\n" + errors.stream().map(ParserException::toString).collect(Collectors.joining("\n"));
+    public void addError(CompositeParserException e) {
+        exceptions.addAll( e.getExceptions() );
     }
 
-    public void addErrors(List<ParserException> errors) {
-        this.errors.addAll(errors);
-    }
-
-    public List<ParserException> getErrors() {
-        return errors;
-    }
-
-    public void addError(ParserException e) {
-        if (e instanceof CompositeParserException) {
-            errors.addAll( ((CompositeParserException)e).getErrors() );
-        } else {
-            errors.add(e);
-        }
+    public void addError(ParseLineException e) {
+        exceptions.add(e);
     }
 
     public boolean isEmpty() {
-        return errors.isEmpty();
-    }
-
-    public ParserException getParserException() {
-        if (errors.size() == 1) return errors.get(0);
-        return this;
+        return exceptions.isEmpty();
     }
 }

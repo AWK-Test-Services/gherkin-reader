@@ -1,13 +1,8 @@
 package com.awk.featr.gherkin.model;
 
 import com.awk.featr.gherkin.helper.GherkinLanguageConstants;
-import com.awk.featr.gherkin.helper.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static com.awk.featr.gherkin.helper.StringUtils.*;
 
@@ -79,9 +74,50 @@ public class GherkinLine implements IGherkinLine {
     }
 
     public List<String> getTableCells() {
-        return Arrays.stream(trimmedLineText.split("\\|"))
-                .skip(1)
-                .map(StringUtils::trim)
-                .collect(Collectors.toList());
+        List<String> cells = new ArrayList<>();
+        StringBuilder cellBuilder = new StringBuilder();
+        boolean beforeFirst = true;
+        boolean escape = false;
+        PrimitiveIterator.OfInt iterator = lineText.codePoints().iterator();
+        while (iterator.hasNext() ) {
+            int c = iterator.next() ;
+            if (escape) {
+                switch (c) {
+                    case 'n':
+                        cellBuilder.append('\n');
+                        break;
+                    case '\\':
+                        cellBuilder.append('\\');
+                        break;
+                    case '|':
+                        cellBuilder.append('|');
+                        break;
+                    default:
+                        // Invalid escape. We'll just ignore it.
+                        cellBuilder.append("\\");
+                        cellBuilder.appendCodePoint(c);
+                        break;
+                }
+                escape = false;
+            } else {
+                if (c == '\\') {
+                    escape = true;
+                } else if (c == '|') {
+                    if (beforeFirst) {
+                        // Skip the first empty span
+                        beforeFirst = false;
+                    } else {
+                        String cell = cellBuilder.toString();
+                        String leftTrimmedCell = ltrim(cell);
+                        cells.add(rtrim(leftTrimmedCell));
+                    }
+                    cellBuilder = new StringBuilder();
+                } else {
+                    cellBuilder.appendCodePoint(c);
+                }
+            }
+        }
+        return cells;
     }
+
 }

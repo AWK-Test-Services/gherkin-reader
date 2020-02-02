@@ -14,6 +14,6 @@ public class GherkinLineError implements GherkinError {
 
     @Override
     public String getMessage() {
-        return String.format("%s: %s\non line \"%s\"", line.getLineNr(), this.getMessage(), line.getLineText());
+        return String.format("\"%s\" on line %s:\n\"%s\"", message, line.getLineNr(), line.getLineText());
     }
 }

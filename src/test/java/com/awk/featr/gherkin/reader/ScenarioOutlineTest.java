@@ -1,9 +1,6 @@
 package com.awk.featr.gherkin.reader;
 
-import com.awk.featr.ast.Document;
-import com.awk.featr.ast.Feature;
-import com.awk.featr.ast.GherkinError;
-import com.awk.featr.ast.Step;
+import com.awk.featr.ast.*;
 import com.awk.featr.gherkin.helper.CompositeParserException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -41,10 +38,32 @@ class ScenarioOutlineTest {
         assertEquals("Minimal Scenario Outline", feature.getName());
 
         assertNoBackground(feature);
-//        Scenario scenario = assertAndGetFirstScenario(feature);
-//
-//        steps = scenario.getSteps();
-//        assertEquals(1, steps.size());
+        ScenarioOutline scenarioOutline = assertAndGetFirstScenarioOutline(feature);
+
+        steps = scenarioOutline.getSteps();
+        assertEquals(1, steps.size());
+
+        Step scenarioStep = steps.get(0);
+        assertEquals(GIVEN, scenarioStep.getKeyword());
+        assertEquals("the <what>", scenarioStep.getText());
+
+        Examples examples = scenarioOutline.getExamples();
+        assertNotNull(examples);
+
+        TableRow header = examples.getHeader();
+        assertNotNull(header);
+        List<String> headerValues = header.getValues();
+        assertEquals(1, headerValues.size());
+        assertEquals("what", headerValues.get(0));
+
+        List<TableRow> rows = examples.getExamples();
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+
+        TableRow row = rows.get(0);
+        List<String> rowValues = row.getValues();
+        assertEquals(1, rowValues.size());
+        assertEquals("minimalism", rowValues.get(0));
     }
 
     @Test

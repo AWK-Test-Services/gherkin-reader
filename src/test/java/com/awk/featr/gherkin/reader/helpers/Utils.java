@@ -49,6 +49,21 @@ public class Utils {
         return scenario;
     }
 
+    public static ScenarioOutline assertAndGetFirstScenarioOutline(Feature feature) {
+        List<ScenarioDefinition> scenarioDefinitions = feature.getScenarioDefinitions();
+        assertNotNull(scenarioDefinitions);
+        assertEquals(1, scenarioDefinitions.size());
+
+        ScenarioDefinition scenarioDefinition = scenarioDefinitions.get(0);
+        assertEquals(ScenarioOutline.class.getSimpleName(), scenarioDefinition.getType());
+
+        ScenarioOutline scenarioOutline = (ScenarioOutline) scenarioDefinition;
+        assertTrue(scenarioOutline.getDescription().isEmpty());
+        assertTrue(scenarioOutline.getTags().isEmpty());
+        return scenarioOutline;
+    }
+
+
     public static void assertNoBackground(Feature feature) {
         Background background = feature.getBackground();
         assertNull(background);

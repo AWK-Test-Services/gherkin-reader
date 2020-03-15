@@ -1,5 +1,6 @@
 package com.awk.featr.gherkin.reader;
 
+import com.awk.featr.ast.builder.ImageBuilder;
 import com.awk.featr.gherkin.helper.*;
 import com.awk.featr.gherkin.model.GherkinLine;
 import com.awk.featr.ast.*;
@@ -14,9 +15,13 @@ import java.util.stream.Collectors;
 public class FeatureReader {
     private final FeatureBuilder featureBuilder;
 
+    private List<Image> usedImages;
+
     FeatureReader(String featureTitle, List<String> tags) {
         featureBuilder = new FeatureBuilder(featureTitle)
                 .withTags(tags);
+
+        usedImages = new ArrayList<>();
     }
 
     public Feature parse(LineReader reader, TokenMatcher tokenMatcher) throws CompositeParserException {
@@ -84,8 +89,52 @@ public class FeatureReader {
 
         if (!exceptions.isEmpty()) throw new CompositeParserException(exceptions);
 
-        featureBuilder.withDescription(descriptionToRemember.toString());
+        featureBuilder.withDescription(extractAndReplaceImages(descriptionToRemember.toString()));
         featureBuilder.withScenarioDefinitions(scenarioDefinitionsToRemember);
         return featureBuilder.build();
+    }
+
+    List<Image> getUsedImages() {
+        return usedImages;
+    }
+
+    void clearUsedImages() {
+        usedImages = new ArrayList<>();
+    }
+
+    private String extractAndReplaceImages(String description) {
+        if( ! hasImage(description) ) {
+            return description;
+        }
+
+        Image image = getImage(description);
+        String newDescription = replaceFirstImage(description, image);
+        this.usedImages.add(image);
+
+        return extractAndReplaceImages(newDescription);
+    }
+
+    private static boolean hasImage(String description) {
+        return description.contains("<ftr-image");
+    }
+
+    private static Image getImage(String description) {
+        String imageLine = getSubstring(description, "<ftr-image", ">");
+        String location = getSubstring(imageLine, "src=\"", "\"");
+        String type = getSubstring(imageLine, "type=\"", "\"");
+        ImageBuilder imageBuilder = new ImageBuilder()
+                .withLocation(location)
+                .withType(type);
+        return imageBuilder.build();
+    }
+
+    private static String getSubstring(String text, String beginTag, String endTag) {
+        int begin = text.indexOf(beginTag) + beginTag.length();
+        int end = text.indexOf(endTag, begin);
+        return text.substring(begin, end);
+    }
+
+    private static String replaceFirstImage(String description, Image image) {
+        return description.replaceFirst("<ftr-image", "<img id=\"" + image.getId() + "\"");
     }
 }

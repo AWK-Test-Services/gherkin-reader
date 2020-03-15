@@ -34,7 +34,13 @@ public class DocumentReader {
 
                     } else if (tokenMatcher.match_FeatureLine(line)) {
                         String title = tokenMatcher.getFeatureTitle(line);
-                        Feature feature = new FeatureReader(title, tagsToRemember).parse(reader, tokenMatcher);
+                        FeatureReader featureReader = new FeatureReader(title, tagsToRemember);
+                        Feature feature = featureReader.parse(reader, tokenMatcher);
+
+                        if ( !featureReader.getUsedImages().isEmpty() ) {
+                            documentBuilder.withUsedImages(featureReader.getUsedImages());
+                            featureReader.clearUsedImages();
+                        }
                         documentBuilder.withFeature(feature);
                         tagsToRemember = new ArrayList<>();
 
@@ -52,7 +58,7 @@ public class DocumentReader {
             } catch (ParseLineException e) {
                 documentBuilder.addError(new GherkinLineError(e.getMessage(), e.getLine()));
             } catch (CompositeParserException e) {
-                e.getExceptions().stream().forEach(
+                e.getExceptions().forEach(
                         exc -> documentBuilder.addError(new GherkinLineError(exc.getMessage(), exc.getLine()))
                 );
             } catch (Exception e) {
@@ -66,5 +72,4 @@ public class DocumentReader {
                 .withComment(comment.toString())
                 .build();
     }
-
 }

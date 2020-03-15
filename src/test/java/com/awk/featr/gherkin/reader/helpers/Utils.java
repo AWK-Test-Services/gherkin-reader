@@ -18,6 +18,7 @@ public class Utils {
 
     private static final String DIRECTORY_FEATURE_FILES = "feature-files" + File.separator;
     public static final String DIRECTORY_GOOD = "good" + File.separator;
+    public static final String DIRECTORY_ADDITIONS = DIRECTORY_GOOD + "additions" + File.separator;
     public static final TokenMatcher TOKEN_MATCHER_EN = new TokenMatcher(GherkinLanguages.get("en"));
     public static final String GIVEN = "Given";
     public static final String AND = "And";

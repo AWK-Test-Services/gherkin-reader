@@ -1,8 +1,11 @@
-package com.awk.featr.gherkin.reader;
+package com.awk.featr.gherkin.reader.additions;
 
 import com.awk.featr.ast.Document;
 import com.awk.featr.ast.Feature;
 import com.awk.featr.ast.GherkinError;
+import com.awk.featr.ast.Image;
+import com.awk.featr.gherkin.reader.DocumentReader;
+import com.awk.featr.gherkin.reader.LineReader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -14,14 +17,14 @@ import static com.awk.featr.gherkin.reader.helpers.Utils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TagsTest {
+class FtrTagTest {
     private Feature feature;
 
     @BeforeAll
     void readFile() {
         LineReader lineReader = null;
         try {
-            lineReader = getLineReader(DIRECTORY_GOOD + "tags.feature");
+            lineReader = getLineReader(DIRECTORY_ADDITIONS + "ftr-tags.feature");
         } catch (IOException e) {
             e.printStackTrace();
             fail("Could not read test-file");
@@ -40,24 +43,12 @@ class TagsTest {
     }
 
     @Test
-    void testFeatureTags() {
-        List<String> tags = feature.getTags();
-        assertEquals(3, tags.size());
+    void testId() {
+        assertEquals("test-id", feature.getFeatureId());
     }
 
-//    @Test
-//    void testScenarioTags() {
-//        assertEquals("test-id", feature.getFeatureId());
-//    }
-//
-//    @Test
-//    void testScenarioOutlineTags() {
-//        assertEquals("test-id", feature.getFeatureId());
-//    }
-//
-//    @Test
-//    void testExamplesTags() {
-//        assertEquals("test-id", feature.getFeatureId());
-//    }
-
+    @Test
+    void testParent() {
+        assertEquals("test-parent", feature.getParentId());
+    }
 }

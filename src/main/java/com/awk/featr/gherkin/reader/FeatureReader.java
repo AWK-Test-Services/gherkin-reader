@@ -13,6 +13,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class FeatureReader {
+    private static final String FTR_ID = "@ftr-id";
+    private static final String FTR_PARENT = "@ftr-parent";
+
     private final FeatureBuilder featureBuilder;
 
     private List<Image> usedImages;
@@ -20,6 +23,7 @@ public class FeatureReader {
     FeatureReader(String featureTitle, List<String> tags) {
         featureBuilder = new FeatureBuilder(featureTitle)
                 .withTags(tags);
+        tags.forEach(this::possiblyAddAsFeatureTag);
 
         usedImages = new ArrayList<>();
     }
@@ -92,6 +96,15 @@ public class FeatureReader {
         featureBuilder.withDescription(extractAndReplaceImages(descriptionToRemember.toString()));
         featureBuilder.withScenarioDefinitions(scenarioDefinitionsToRemember);
         return featureBuilder.build();
+    }
+
+    private String possiblyAddAsFeatureTag(String tag) {
+        if ( tag.startsWith(FTR_ID) ) {
+            featureBuilder.withFeatureId(tag.substring(FTR_ID.length()+1));
+        } else if ( tag.startsWith(FTR_PARENT) ) {
+            featureBuilder.withParentId(tag.substring(FTR_PARENT.length()+1));
+        }
+        return tag;
     }
 
     List<Image> getUsedImages() {

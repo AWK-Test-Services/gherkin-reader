@@ -6,7 +6,7 @@
 
     <groupId>com.awk-test-services</groupId>
     <artifactId>gherkin-reader</artifactId>
-    <version>0.2.3</version>
+    <version>0.2.4</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.awk-test-services</groupId>
             <artifactId>featr-ast-model</artifactId>
-            <version>0.2.0</version>
+            <version>0.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
